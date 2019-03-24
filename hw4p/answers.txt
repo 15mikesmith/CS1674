@@ -1,0 +1,7 @@
+The smallest within-between ratio is BOW at 0.(Actually Nan since you are dividing 0 by 0)
+ I think this is because since we normalize all the vectors sum to 1.
+Then when we get the mean of each vector would sum up to 1 and be divided by 10 elements which is 0.1.
+Then since the distance bewteen 0.1 and 0.1 is just 0, We get 0 for all of them.
+
+I think the best descriptor was texture_repr_mean. 
+Since it had the most precision out of all these other image representations.

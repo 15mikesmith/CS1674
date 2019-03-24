@@ -1,0 +1,6 @@
+Explain what you see in your plot (using the full range of k values), and explain the trends on the training and test sets you see as k increases
+
+As the K values increase, KNN Test Accuracy starts at a high amount of acccuracy and then overtime drops slightly.
+Meanwhile KNN Train Accuracy,starts at a very low accuracy and increases steadily and levels off.
+Both SVM Test Accuracy and SVM Train Accuracy remain constant.
+

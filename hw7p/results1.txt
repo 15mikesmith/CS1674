@@ -1,0 +1,8 @@
+Describe your findings, and give your explanation of the performance of the different representations.
+
+The accuracy varies everytime the compare_representations.m is run due to the randomization.
+The pyramid representation accuracy was 0.5633, at level_0 representation accuracy was 0.60 and at level_1 representation accuracy was at 0.5750.
+The accuracy differs because level_1 has more sift descriptors but they contribute negativily to its accuracy, hence the lower accuracy.
+Meanwhile level_0 has better accuracy, despite being more limited in the amount of sift desciptors it contains, has a high accuracy.
+This can be attributed to the fact that those specific descriptors matter more than others that may be found.
+The pyramid representation is the worst since it combines the level_0 and level_1 sift descriptors.

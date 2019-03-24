@@ -1,0 +1,3 @@
+Which weight matrix is the best one.
+(1) according to the hinge loss. W2 had the lowest loss at 2.6623.
+(2) according to the cross-entropy loss. W2 had the lowest loss at 0.6104.

@@ -1,0 +1,5 @@
+
+Elapsed time in seconds using a loop is:    0.120278 
+Elapsed time in seconds without using a loop is:    0.014537 
+Dimensions are:   750.000000  1500.000000
+    3.000000 

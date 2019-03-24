@@ -1,0 +1,4 @@
+How the performance of these features compares to the performance you obtained in HW7P with SIFT BOW and SIFT SPM. 
+
+For FC6, I get an accuracy of 0.9044 and for FC7, I get an accuracy of 0.8874.
+Both these are better than the accuracies of SIFT BOW and SIFT SPM in which I got around 0.55 to 0.60 for the accuracy, depending for the specific level
