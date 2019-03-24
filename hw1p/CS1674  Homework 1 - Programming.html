@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>CS1674: Homework 1 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 1 - Programming</h2>
+<b>Due:</b> <font color="red">1/23</font>/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 50 points.
+<br><br>
+
+Write your code in a script called <font face="courier new">hw1p.m</font>, except where noted. In addition to your code, please also submit an <font face="Courier New">answers.txt</font> file where you write down the answers requested below. 
+<br><br>
+
+Since one optimization that Matlab uses is to vectorize code rather than use loops, pay close attention to whether you are allowed to use loops. Remember to use the Matlab documentation whenever needed. 
+<br>
+
+<p>Matrices and vectors:</p>
+<ol>
+<li>Generate a 1000000x1 (one million by one) vector of random numbers from a Gaussian (normal) distribution with mean of 0 and standard deviation of 5. Use Matlab's <font face="Courier New">randn</font> function. </li>
+<li>Add 1 to every value in the previous list, by using a loop. To determine how many times to loop, use Matlab's <font face="Courier New">size</font> function. Time this operation and print the number in the code. Write that number down in <font face="Courier New">answers.txt</font>. Use Matlab's documentation to find out how to time operations. </li>
+<li>Now add 1 to every value in the original random vector, without using a loop. Time this operation, print the time and write it down. Use a different way to print the number than the method you used above. (See ways to print numbers at the beginning of the Matlab tutorial script.) </li> 
+<li>Create two matrices <font face="courier new">A</font> and <font face="courier new">B</font> which, when added together, result in a 10x10 matrix <font face="courier new">C</font> containing all numbers from 1 to 100. In other words, when I add <font face="courier new">A</font> and <font face="courier new">B</font> and convert the result to vector form, I should get a vector containing all numbers from 1 to 100. In code, <font face="courier new">C = A + B; assert(all(C(:) == (1:100)') == 1);</font> Each matrix should only be created with a single command (no loops).</li>
+<li>Plot the exponential function <font face="courier new">2.^x</font>, for non-negative <i>even</i> values of x smaller than 100, without using loops.</li>
+</ol>
+
+<p>Loops allowed:</p>
+<ol start="6">
+<li>Create a script that prints all the values between 1 and 10, in random order, with pauses of 1 second between each two prints.</li>
+<li>Generate two random matrices <font face="Courier New">A</font> and <font face="Courier New">B</font>, and compute their product by hand, using loops. The size of the first matrix should be [5, 3] and of the second [3, 5]. Check your code by comparing the loop-computed product with the product that you get from Matlab's <font face="Courier New">A*B</font>. </li>
+</ol>
+
+<p>Functions:</p>
+<ol start="8">
+<li>Write a function <font face="courier new">function [B] = normalize_rows(A)</font> which uses a single command (one line and no loops) to make the sum in each row of the matrix 1. You may need to use <font face="Courier New">repmat</font>, depending on your Matlab version. Note that the sum of the entries in <i>each</i> row should be 1, in the matrix output by your function. </li>
+<li>Now write a function <font face="courier new">function [B] = normalize_columns(A)</font> which instead ensures that the sum in each <i>column</i> is 1.</li>
+<li>Create a function <font face="courier new">function [val] = fib(n)</font> that returns the n-th number (n >= 1) in the Fibonacci sequence 1, 1, 2, 3, 5, 8, 13...</li>
+<li>Implement a function <font face="courier new">function [N] = my_unique(M)</font> that takes in a matrix <font face="courier new">M</font>, removes duplicate rows from that input matrix and outputs the result as matrix <font face="courier new">N</font>. You cannot call Matlab's <font face="courier new">unique</font> function. Loops are allowed.</li>
+
+</ol>
+
+<p>Images:</p>
+<ol start="12">
+<li>Read <a href="pittsburgh.png">this image</a> into Matlab as a matrix, and write down its dimensions.</li>
+<li>Convert the image into grayscale.</li>
+<li>Use the function <font face="Courier New">sum</font> and a logical operator which measures equality to a scalar, to determine and write down how many pixels in the grayscale image are equal to 6. Don't use loops. </li>
+<li>Find the darkest pixel in the image, and write its value and [row, column] in your answer sheet. Don't use loops. Hint: Convert to a vector first, and use Matlab's <font face="Courier New">ind2sub</font> function. Use Matlab's <font face="Courier New">help</font> to find out how to use that function.</li>
+<li>Consider a 31x31 square (a square with side equal to 31 pixels) that is centered on the darkest pixel from question 14. Replace all pixels in that square with white pixels (pixels with value 255). Do this with loops.</li>
+<li>Take the previous image with the white square in it. Place a 121x121 <i>gray</i> square (e.g. pixel values 150) at the center of this image. This time you are NOT allowed to use loops. Hint: You can access a <i>range</i> of rows and columns in a matrix; think about how.</li>
+<li>Make a new figure, display the modified image (which includes both a white square and gray square), and save the new figure to a file using <font face="courier new">saveas(gcf, 'new_image.png')</font>.</li>
+<li>Using the original <font face="courier new">pittsburgh.png</font> image, compute the scalar average pixel value along each channel (R, G, B) separately, then subtract the average value per channel. Display the resulting image and write it to a file <font face="Courier New">mean_sub.png</font>. If you choose to do this using a new matrix as your image, make sure it is of the same class/datatype (<font face="courier new">uint8</font>) as the original image; a simple cast would do the job. You may use loops. </li>
+</ol>
+
+<br>
+<b>Submission:</b> Please include the following files:
+<ul>
+<li>A Matlab script <font face="courier new">hw1p.m</font></li>
+<li>Matlab functions (in corresponding files with the same names): <font face="courier new">normalize_rows</font>, <font face="courier new">normalize_columns</font>, <font face="courier new">fib</font> and <font face="courier new">my_unique</font>   </li>
+<li>An answers file (where answers are requested above) <font face="courier new">answers.txt</font></li>
+<li>Image files <font face="courier new">new_image.png</font> and <font face="courier new">mean_sub.png</font></li>
+</ul>
+
+<br>
+</body>
+</html>
