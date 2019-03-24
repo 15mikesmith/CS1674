@@ -1,0 +1,122 @@
+<html>
+<head>
+<title>CS1674: Homework 5 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 5 - Programming</h2>
+<b>Due:</b> 3/1/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 50 points.
+<br><br>
+
+<u>Part I: Image segmentation with K-means</u> (20 points) 
+<br><br>
+For this problem you will "quantize"
+a color space by applying k-means clustering
+to the pixels. You will map each pixel
+in the input image to its nearest k-means center. That is, you will replace the R,G,B value at each
+pixel with the <i>average</i> R,G,B value in the cluster to which that pixel belongs. This reduces the amount of information carried by the image, since pixels that had different colors now have the same color. It is also a form of segmentation, since there is only a small number of colors, and the <i>ID of the cluster</i> to which an image pixel belongs is the same as the pixel's <i>color</i>.  
+<br><br>
+Include the following in your submission:
+<ol type="a">
+<li>
+[15 pts] <font face="courier new">function [outputImg, meanColors, clusterIds] = quantizeRGB(origImg, k)</font> which performs clustering in the 3-dimensional RGB space, and "quantizes" the image. Use the built-in Matlab function <font face="courier new">kmeans</font>. At the end of your function, show the (1) original and (2) quantized image, in a 1x2 subplot. Make sure to label the figure with the value of <i>k</i> that was used.
+<br><br>
+Inputs:
+<ul>
+<li><font face="courier new">origImg</font> is an RGB image of class <font face="courier new">uint8</font>, and</li>
+<li><font face="courier new">k</font> specifies the number of colors to quantize to (i.e. the number of clusters).</li>
+</ul>
+<br>
+Outputs:
+<ul>
+<li><font face="courier new">outputImg</font> is an RGB image of class <font face="courier new">uint8</font> and the same size as the original image,</li>
+<li> <font face="courier new">meanColors</font> is a <i>k</i>x3 array of the <i>k</i> centers (one value for each cluster and each color channel), and </li>
+<li><font face="courier new">clusterIds</font> is a <i>numpixels</i>x1 matrix (with <i>numpixels = numrows * numcolumns</i>) that says to which cluster each pixel belongs.</li>
+</ul> 
+<br>
+
+Tip: 
+If the variable <font face="courier new">origImg</font> is a 3d matrix (<i>numrows</i>x<i>numcols</i>x3) containing a color image with <i>numpixels</i> pixels (first two dimensions) in each color channel (third dimension), then <font face="courier new">X = reshape(origImg, numpixels, 3);</font> will yield a matrix with the RGB features as its rows. It is in this space (samples = rows, features = columns) that you want to apply k-means.</li>
+<br>
+<li>
+[5 pts] Run your function on the provided image <font face="courier new"><a href="fish.jpg">fish.jpg</a></font>. Use three different values of <i>k</i>; display and submit the results.  For example, if you set <i>k</i>=2, you might get:
+<br><br><img src="quantized_rgb_k2.png" width=400/><br><br>
+</li>
+</ol>
+
+<u>Part II: Edge detection and circle detection</u> (30 points)
+
+<br><br>
+<img src="egg.jpg"/>
+<br><br>
+In this problem, you will implement (1) a simple edge detector, and (2) a Hough Transform circle detector that takes an input
+image and a fixed radius, and returns the centers of any detected
+circles of about that size. You are not allowed to use any built-in Matlab functions for finding edges or circles! 
+<br><br>
+The following function is provided on CourseWeb:
+<ul><li>
+<font face="courier new">function [edges] = detectEdges(im, threshold)</font> -- A function to compute edges in an image. Converts to grayscale first, computes gradients, then computes the gradient magnitude and orientation at each pixel, and only returns those <i>(x, y)</i> locations with magnitude that is higher than the threshold. The function also displays the final thresholded edge image.
+<br><br>
+Inputs:
+<ul>
+<li><font face="courier new">im</font> is the RGB input image of class <font face="courier new">uint8</font>, and </li>
+<li><font face="courier new">threshold</font> is a user-set threshold for detecting edges.</li>
+</ul>
+<br>
+Output:
+<ul>
+<li><font face="courier new">edges</font> is an <i>N</i>x4 matrix containing 4 numbers for each of <i>N</i> detected edge points: <i>N(i, 1)</i> is the <i>x</i> location of the point, <i>N(i, 2)</i> is the <i>y</i> location of the point, <i>N(i, 3)</i> is the gradient magnitude at the point, and <i>N(i, 4)</i> is the gradient orientation (non-quantized) at the point. </li>
+</ul>
+</li></ul>
+<br>
+Include the following in your submission:
+<ol type="a">
+<li>[20 pts]
+<font face="courier new">function [centers] = detectCircles(im, edges, radius, top_k)</font> -- A function to find and visualize circles given an edge map. 
+<br><br>
+Inputs:
+<ul>
+<li><font face="courier new">im, edges</font> are defined as above, </li>
+<li><font face="courier new">radius</font> specifies the size of circle we are looking for, and</li>
+<li><font face="courier new">top_k</font> says how many of the top-scoring circle center possibilities to show and output. </li>
+</ul>
+<br>
+Output:
+<ul>
+<li><font face="courier new">centers</font> is an <i>N</i>x2 matrix in which each row lists the <i>x, y</i> position of a detected circle's center. </li>
+</ul>
+<br>
+Tips:
+<ul>
+<li>Since we use <font face="courier new">atan<b><u>d</u></b></font> to compute gradient orientation in <b><u>d</u></b>egrees, make sure you use <font face="courier new">cos<b><u>d</u></b></font> and <font face="courier new">sin<b><u>d</u></b></font> to detect circles. </li>
+<li>Consider using <font face="courier new">ceil(a / quantization_value)</font> and <font face="courier new">ceil(b / quantization_value)</font> (where, for example, <font face="courier new">quantization_value</font> can be set to 5)</font> to easily figure out quantization/bins in Hough space. Don't forget to multiply by <font face="courier new">quantization_value</font> once you've figured out the Hough parameters with most votes, to find out the actual <i>x, y</i> location corresponding to the selected bin.</li>
+<li>You can use this line at the end of your function to visualize circles: <font face="courier new">figure; imshow(im); viscircles(centers, radius * ones(size(centers, 1), 1));</font>.</li>
+<li>You can ignore circles whose centers are outside the image.</li>
+</ul>
+</li>
+<br>
+<li>[10 pts] Demonstrate the function applied to the provided images <font face="courier new"><a href="jupiter.jpg">jupiter.jpg</a></font> and
+<font face="courier new"><a href="egg.jpg">egg.jpg</a></font>. Display the images with detected
+circle(s), label the figure with the radius, save your image outputs, and include them in your submission. You can use <font face="courier new">impixelinfo</font> to estimate the
+radius of interest manually. </li>
+</ol>
+<br>
+
+<b>Submission:</b>
+<ul>
+<li><font face="courier new">quantizeRGB.m</font></li>
+<li>3 different images with different <i>k</i> applied on <font face="courier new">fish.jpg</font>, named <font face="courier new">k?.png</font>, <font face="courier new">k??.png</font>, <font face="courier new">k???.png</font>, where the question marks are replaced with the values of <i>k</i> you used </li>
+<li><font face="courier new">detectCircles.m</font></li>
+<li>demonstrations of your circle detection on the provided images <font face="courier new">jupiter.jpg</font> and <font face="courier new">egg.jpg</font>, for one radius (can be different for the two images), named <font face="courier new">jupiter_circles.png</font> and <font face="courier new">egg_circles.png</font>, respectively</li>
+</ul>
+<br>
+
+
+<b>Acknowledgement:</b> This assignment was adapted from Kristen Grauman's original assignment.
+<br><br>
+
+
+</body>
+</html>

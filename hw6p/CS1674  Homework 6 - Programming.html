@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>CS1674: Homework 6 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 6 - Programming</h2>
+<b>Due:</b> 3/15/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 40 points.
+<br><br>
+
+In this exercise, you will compute an image homography, from matching points between two images. Using this homography, you can tell where points from the first image appear in the second image. You can also compute a warp between the two images, stitching the two images into the same canvas. 
+<br><br>
+
+You are required to write and submit the following:
+<ol>
+<li>[10 pts] Function <font face="courier new">H = estimate_homography(PA, PB)</font> to compute a homography between the points from the first image (in matrix <font face="courier new">PA</font>) and second image (in matrix <font face="courier new">PB</font>). Inputs: <font face="courier new">PA</font> and <font face="courier new">PB</font> are 4x2 matrices; each row contains the <i>(x, y)</i> coordinates of matching points (a row in the first matrix should be the match for a row in the second matrix). Output: <font face="courier new">H</font> is a 3x3 matrix. You need to set up a system of equations <font face="courier new">A</font> as shown in slide 30 <a href="http://people.cs.pitt.edu/~kovashka/cs1674_sp18/vision_06_transformations.pdf">here</a>. Once you set up your system <font face="courier new">A</font>, solve for <font face="courier new">H</font> using: <font face="courier new">[~, ~, V] = svd(A); h = V(:, end); H = reshape(h, 3, 3)';</font>.</li> <br>
+<li>[5 pts] Function <font face="courier new">[p2] = apply_homography(p1, H)</font> to apply the homography and convert back from homogeneous coordinates, as shown in slide 32.</li> <br>
+<li>[25 pts] Script titled <font face="courier new">mosaic.m</font> where you load images, select matching points, compute a homography, apply it to a new point from the first image, and stitch a mosaic from the two images:
+<ol type="a">
+<!--<a href="keble1.png"><font face="courier new">img1</font></a>, <a href="keble2.png"><font face="courier new">img2</font></a>-->
+<!--<a href="uttower1.JPG"><font face="courier new">image1</font></a>, <a href="uttower2.JPG"><font face="courier new">image2</font></a>-->
+<li>[2 pts] Use the following two images: <a href="keble1.png"><font face="courier new" color="red">keble1</font></a>, <a href="keble2.png"><font face="courier new" color="red">keble2</font></a>. Load them into Matlab and show them in separate figures, followed by the command <font face="courier new">impixelinfo</font> after each figure. This will allow you to see pixel coordinates at the bottom of the figures, when you hover over the images.</li>
+<li>[3 pts] Examine the images, and determine at least four pairs of points (in each pair, one point should be from the first image, and one from the second image) that are distinctive. Write them down in matrix form in the script, with rows being the points and columns being the <i>x</i> and <i>y</i> locations. This will give you the <font face="courier new">PA, PB</font> to use below.</li>
+<li>[2 pts] Use the function <font face="courier new">H = estimate_homography(PA, PB)</font> you wrote that computes a homography between the points from the first image (in matrix <font face="courier new">PA</font>) and second image (in matrix <font face="courier new">PB</font>) that you found in the previous step. </li>
+<li>[3 pts] Now pick one new point from the first image, write it down in your script, and use the computed homography to compute where it "lands" in the second image. Use your <font face="courier new">apply_homography</font> function to do this. Create a 1x2 subplot which shows (1) the first image, with the <font face="courier new">p1</font> point selected shown in green, and (2) the second image, with the <font face="courier new">p2</font> point computed using the homography, shown in yellow.</li>
+<li>Now stitch a mosaic from the two images. 
+<ul>
+<li>[2 pts] Create a new canvas which replicates the size of <font face="courier new">image2</font> 3 times in the horizontal and 3 times in the vertical direction, and puts <font face="courier new">image2</font> in the middle of this canvas. </li>
+<li>[8 pts] For each pixel at location <font face="courier new">p1</font> in <font face="courier new">image1</font>, apply the estimated homography to determine location <font face="courier new">p2</font> where to send the pixel from <font face="courier new">p1</font> into the canvas you created. The new location you compute might be negative, which means in indexes the black part of the canvas; you will need to add two values to the first and second component of <font face="courier new">p2</font>, to convert from <font face="courier new">image2</font>'s coordinate system to the large canvas' coordinate system. The location you computed might be a non-integer so round both the <i>x</i> and <i>y</i> components up and down (using <font face="courier new">ceil</font> and <font face="courier new">floor</font>), resulting in up to four locations for each pixel in <font face="courier new">image1</font>.</li>
+<li>[2 pts] Add each pixel from <font face="courier new">image1</font> to (four locations in) the large canvas. </li> 
+<li>[3 pt] After iterating over all pixels in <font face="courier new">image1</font>, show the stitched result.</li>
+</ol>
+</li>
+</ol>
+<br>
+
+<b>Submission:</b>
+<ul>
+<li><font face="courier new">estimate_homography.m</font></li>
+<li><font face="courier new">apply_homography.m</font></li>
+<li><font face="courier new">mosaic.m</font></li>
+</ul>
+<br>
+
+</body>
+</html>

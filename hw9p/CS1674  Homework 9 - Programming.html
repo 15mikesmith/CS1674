@@ -1,0 +1,168 @@
+<html><head>
+<title>CS1674: Homework 9 - Programming</title>
+<style type="text/css">
+</style>
+</head>
+<body>
+<h2>CS1674: Homework 9 - Programming</h2>
+<b>Due:</b> 4/12/2018, 11:59pm 
+<br><br>
+
+This assignment is worth 50 points.
+<br><br>
+
+In this assignment, you will use a deep network to perform categorization. In order to simplify the problem, you will not <i>train</i> 
+a deep net. Instead, you will use a common practice of simply using a 
+pre-trained network to extract features. You will then use these features to 
+train an SVM classifier which discriminates between the 10 scene categories used in HW7P.<br><br>
+
+You will use the Caffe package, a very popular deep learning framework for 
+computer vision. Caffe is a C++ framework, but has both Python and Matlab 
+interfaces. In this assignment, we will only use the Matlab interface.&nbsp; 
+We have installed Caffe for you on the <strong>class4.cs.pitt.edu</strong> 
+server.<br><br>
+
+Submit all code you write in a single script <font face="courier new">solution.m</font>.
+<br><br>
+
+<ol>
+<u>Setup:</u><br><br>
+<li>You will be connecting to the server via SSH. If you are using a Windows 
+machine and haven't used SSH before, you will need to first download a SSH 
+client such as PuTTY. You can download PuTTY from
+<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">here</a>. 
+If you are using a Mac or Linux, you already have ssh installed. </li>
+<li>
+                If you are off campus and don't have the VPN installed, you will
+                need to first connect to Pitt's server and then ssh over to
+                the class4 server. If you are on a Mac or Linux, open
+                a terminal and type:
+                <font face="courier new">ssh USERNAME@unixs.cis.pitt.edu</font>
+                (where USERNAME is your Pitt username) and press enter to connect to the
+                server. If you are on Windows, open PuTTY; for the host name,
+                enter <font face="courier new">unixs.cis.pitt.edu</font>, then click Open to connect to the server. You will need
+                to enter your Pitt username and password when prompted by the
+                server. Once you are connected to that server, you can then type: <font face="courier new">ssh
+                class4.cs.pitt.edu</font> and press enter to connect to the class4 server. If you
+                are on campus, or have the VPN installed, you should
+                be able to connect to the class4 server directly.
+</li>
+	<li>Once you are logged in, you will be taken to your AFS home directory and 
+	will probably see a &quot;public&quot; and &quot;private&quot; directory (if you have not 
+	changed these yourself). Make sure to put any assignment files you are 
+	working on in the private directory (or another directory which no one 
+	except you can access). </li>
+	<li>You can either write your Matlab assignment file on your own computer 
+	and transfer it to the server using scp (on Mac or Linux) or WinSCP (you'll 
+	need to download this on Windows) to run it on the server, or directly write 
+	the Matlab assignment file on the server using a text editor. 
+	On Mac or Linux an scp command to copy a file you've written to the server 
+	might look like this (where my username is clt29): <font face="courier new">scp 
+	your_matlab_assignment_file.m clt29@class4.cs.pitt.edu:/afs/pitt.edu/home/c/l/clt29/private/&nbsp;</font> 
+	This command will copy the Matlab file from your computer to your AFS 
+	storage space. If you are on Windows and install WinSCP, you will be 
+	presented with a GUI interface where you can drag and drop files from your 
+	computer to your AFS space.</li>
+	<li>Caffe requires libraries to be visible to Matlab for it to work. We need 
+	to tell Matlab where these libraries are located. Before starting matlab, 
+	type the following directly into the bash shell on the server:  
+	<font face="courier new">export LD_LIBRARY_PATH=/u/caffe/helper_tools/lib:/u/caffe/build/lib:/opt/cuda-7.5/lib64:/usr/local/lib:$LD_LIBRARY_PATH</font> </li>
+	<li>To launch Matlab on the server, type <font face="courier new">matlab -nodisplay</font>. 
+	We include the <font face="courier new">-nodisplay</font> so that Matlab does not attempt to open the GUI 
+	interface. You can then begin typing commands as you normally would in 
+	Matlab or run a script that you write.</li>
+	<li>Matlab needs to know where to find its interface to the Caffe library. 
+	The Matlab <font face="courier new">addpath</font> command allows you to specify the location of files your 
+	scripts need to run. Add the following line to the top of your script: 
+	<font face="courier new">addpath('/u/caffe/matlab/')</font></li>
+	
+	
+	<br><u>Loading the model and data, extracting features:</u><br><br>
+	<li>We will now load in a pretrained CNN model. The model we are loading has 
+	been trained on 1.4M images to classify each into 1000 classes.
+<!--	(which aren't necessarily the objects we will be classfying). -->
+	Add the following 
+	line to your script:<br><font face="courier new">net = caffe.Net('/u/caffe/hw_cs1674/models/deploy.prototxt', 
+	'/u/caffe/hw_cs1674/models/alexnet.caffemodel', 'test');</font> <br> The caffe.Net 
+	function loads a network model for use in Matlab. The first argument 
+	specifies a file containing the network structure which tells Caffe how the 
+	various network layers connect. The second argument specifies the learned 
+	model weights to load, and copies 
+	them into the network structure created by the first argument.&nbsp; 
+	The final argument tells Caffe to load the network in test mode, rather than 
+	train mode. You will see a lot of output appear once you execute this 
+	command which you can ignore.</li>
+	<li>It is standard practice to subtract the mean of the train 
+	data from each image before feeding the image to the CNN. Load the mean image of 
+	the train data by using the following command:<br>
+	<font face="courier new">image_mean = caffe.io.read_mean('/u/caffe/hw_cs1674/models/mean227.binaryproto');</font></li>
+	<li>The data for this assignment is located at <font face="courier new">/u/caffe/hw_cs1674/data/scenes_lazebnik/</font>. 
+	You will find 10 folders with scene category names. Each folder contains 
+	60 images of the scene specified. You can use the Matlab 
+	<font face="courier new">imageSet</font> function with the 'recursive' parameter to obtain a list of folders 
+	and all images in them for easy processing. Note this function is part of the Computer Vision Toolbox. Alternatively, you can any useful parts from <font face="courier new">load_split_dataset.m</font> from HW7P.</li>
+<li>	The name of the folder is the 
+	image's ground truth label. For each image, you will need to extract two 
+	feature types from the CNN, 'fc6' and 'fc7', and store them in a variable. Later, you will train a 
+	linear SVM on each of the feature types.</li>
+	<li>In order to extract the features for an image, first load the image in 
+	Matlab using the <font face="courier new">caffe.io.load_image('PATH')</font> function, where <font face="courier new">PATH</font> is the path to the image you want to pass through the network. 
+	Do not use Matlab's <font face="courier new">imread</font> function. Caffe expects images in BGR 
+	format (instead of RGB), needs to have the width and height dimensions 
+	flipped, and needs to be in single precision. The <font face="courier new">load_image</font> function will 
+	do all of these things for you automatically. Because we are using black and white images, we need to convert to color using <font face="courier new">cat(3, im, im, im)</font>. After this conversion, use 
+	Matlab's <font face="courier new">imresize</font> function to resize the 
+	image to height and width 227 (which is what this model expects). After 
+	resizing the image, subtract the <font face="courier new">image_mean</font> 
+	we loaded previously from the image. You can then run the image through the 
+	neural network by using the command <font face="courier new">net.forward({im});</font></li>
+	<li>Once the image has been run through the neural network, we are ready to 
+	extract features from the network. You will be extracting features from two of the three fully connected layers of the network, 'fc7' and 'fc6'. To extract 
+	an image feature from the network, use the command<br>
+	<font face="courier new">net.blobs(feature_name).get_data();</font><br>
+	Store the features you extract somewhere, so you can use them to train the SVM.</li>
+	
+	
+	<br><u>Training and testing the SVM:</u><br><br>
+	
+	<li>Use the same number of train/test images as for HW7P, i.e. 30 images from each of 10 classes to train, and 30 images from each class to test. Randomly sample the 30 images for training from the 60 images avaialble for each class. Use the remaining 30 images per class for testing.</li>
+	<li>Train 2 linear SVMs using Matlab's <font face="courier new">fitcecoc</font> 
+	function. <!--To specify that Matlab should train linear SVMs, pass the 
+	following <font face="courier new">templateSVM</font> to the <font face="courier new">fitceoc</font> function. Matlab will also automatically standardize your train and test data for you.<br>
+	<font face="courier new">
+	templateSVM('Standardize',1,'KernelFunction','linear');</font> -->
+	</li>
+	<li>Test each of your SVMs on the test set and report the accuracy, in a file <font face="courier new">accuracies.txt</font>. Add a brief sentence in the text file saying how the performance of these features compares to the performance you obtained in HW7P with SIFT BOW and SIFT SPM.
+	<!--Also 
+	include a confusion matrix for each of the feature types using the
+	<span class="auto-style1">confusionmat</span> function and include it in 
+	your submission. What do you observe about the types of errors the network 
+	makes? Enter your answer in a new text file <font face="courier new">observations.txt</font>.-->
+	</li>
+</ol>
+<br>
+
+<b>Submission:</b> 
+<ul>
+<li><font face="courier new">solution.m</font></li>
+<li><font face="courier new">accuracies.txt</font></li>
+</ul>
+<br>
+
+<b>Grading rubric:</b>
+<ul>
+<li>[10 pts] Setting up the network, getting the mean image, iterating over the images in folders</li>
+<li>[10 pts] Loading and preparing each image in order to pass it through the network</li>
+<li>[10 pts] Extracting the features from the network for all images</li>
+<li>[10 pts] Aggregating the features and training the two SVMs</li>
+<li>[10 pts] Computing and reporting accuracy</li>
+</ul>
+<br>
+
+<b>Acknowledgement</b>: This assignment was designed by Chris Thomas and Nils Murrugarra-Llerena.
+<!--The photos used for this assignment are a subset of the
+<a href="http://host.robots.ox.ac.uk/pascal/VOC/">VOC database</a>.-->
+<br><br>
+
+
+</body></html>

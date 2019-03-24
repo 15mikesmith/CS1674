@@ -1,0 +1,169 @@
+<html>
+<head>
+<title>CS1674: Homework 7 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 7 - Programming</h2>
+<b>Due:</b> 3/<font color="red">27</font>/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 50 points.
+<br><br>
+
+In this assignment, you will develop two variants of a scene categorization system. You will write three functions and two scripts. The first function will compute the spatial pyramid match representation. The second and third will find labels for your test images, using two classifiers: K nearest neighbors (KNN), and support vector machines (SVM). In the scripts, you will set up the dataset, divide it into a training set and a test set, call your first function to compute the SPM representation, call your other functions to compute labels for the test data in different ways, and compare the performance of different levels of the SPM representation, and different classifiers. 
+<br><br>
+Read the script <font face="courier new">load_split_dataset.m</font>
+so that you know how to use its outputs. Specify the path where you
+downloaded and extracted the dataset, then run the script (it will
+take a few minutes). In brief, this script loads the scene
+categorization dataset provided with the assignment (including
+features and labels), divides the dataset into a training and test set
+by randomly choosing 30 images from each class for training and
+another 30 for testing, uses the folder membership of images to create
+labels, and runs K-means clustering. It outputs the following
+variables: <font face="courier new">train_labels, test_labels,
+  train_images, test_images, train_sift, test_sift</font>. The first
+two are vectors of size <i>M</i>x1 and <i>N</i>x1, where <i>M</i> is
+the total number training images and <i>N</i> is the total number of
+test images. The remaining variables are cell arrays of size <i>M</i>
+or <i>N</i>, and contain the <font color="red">grayscale</font> images and collection of SIFT features for each image.
+<br><br>
+SIFT features for each image are extracted for you using
+the <font face="courier new">vl_sift</font> function of the VLFeat
+package. Each feature .mat file contains two
+variables: <font face="courier new">f</font> and <font face="courier
+							     new">d</font>. Each
+<font color="red">column</font> in the first variable matches a
+  <font color="red">column</font> in the second variable; both correspond to
+  the same descriptor. You need the first two entries in each
+  <font color="red">column</font> of <font face="courier new">f</font> to
+  determine the (x, y) coordinates of the descriptor stored in that
+  <font color="red">column</font> of <font face="courier new">d</font>. You can read more about the format of these two variables <a href="http://www.vlfeat.org/overview/sift.html">here</a>. Images and SIFT features are provided on CourseWeb. For computational reasons (time), we will only use 10 categories, and a randomly chosen set of 60 images from each.
+<br><br><br>
+
+<u>Part I: Computing the SPM representation</u> (10 points)
+<br><br>
+The <a href="http://web.engr.illinois.edu/~slazebni/publications/cvpr06b.pdf">spatial pyramid representation</a> was proposed in 2006 by Svetlana Lazebnik, Cordelia Schmid and Jean Ponce, and won the "test of time" award at CVPR 2016. The procedure of computing the pyramid is summarized in the following image from the paper, and described below.
+<br><br>
+<img src="spm.jpg" width=500/>
+<br><br>
+Write the following: <font face="courier new">function [pyramid, level_0, level_1, level_2] = computeSPMRepr(im, sift, means);</font> which computes the Spatial Pyramid Match histogram as described in class.
+<br><br>
+
+Inputs:
+<ul>
+<li><font face="courier new">im</font> is an image (input only so that we can compute its height/width) with provided SIFT features <font face="courier new">sift</font>, and </li>
+<li><font face="courier new">means</font> are the cluster centers from the bag-of-visual-words clustering operation (computed on the training images, as described in Part III below). </li>
+</ul>
+
+Outputs: 
+<ul>
+<li><font face="courier new">pyramid</font> should be a 1x<i>d</i> feature descriptor for the image combining the level-0, level-1, and optionally level-2 levels of the spatial pyramid match representation.  </li>
+<li><font face="courier new">level_0</font> should be the standard bag-of-words histogram,</li>
+<li><font face="courier new">level_1</font> should be the bag-of-words histogram at level-1 (i.e. one histogram for each quadrant of the image), and</li>
+<li><font face="courier new">level_2</font> should be the level-2 bag-of-words histogram if you choose to complete the extra credit part of the assignment (see below), or set <font face="courier new">level_2 = [];</font> otherwise.</li>
+</ul>
+
+Instructions:
+<ol type="a">
+<li>[2 pts] First, create a "bag of words" histogram representation of the features in the image, using the provided <font face="courier new">function [bow] = computeBOWRepr(descriptors, means)</font>. This will give you the representation shown in the left-hand side of the figure, where the circles, diamonds and crosses denote different "words". In this toy example with <i>K</i> = 3; in your submission, use <i>K</i> = 50. This forms your representation of the image, at level <i>L</i> = 0 of the pyramid.</li>
+<!-- Tip: If your <font face="courier new">computeBOWRepr</font> calls <font face="courier new">kmeansML</font> which in turn calls <font face="courier new">dist2</font>, your code will crash if you don't have at least as many keypoints as there are clusters; if so, simply set the histogram for that image quadrant to all zeros. -->
+<li>[7 pts] Then, divide the image into four quadrants as shown below. You need to know the locations of the feature descriptors so that you know in which quadrant they fall; VLFeat provides these (see documentation for <font face="courier new">vl_sift</font>) and they are stored in the <font face="courier new" color="red">f</font> variable. Compute four BOW histograms, using the <font face="courier new">computeBOWRepr</font> function, but generating a separate BOW representation for each quadrant. The concatenation of the four histograms is your level-1 representation of the image.<br><br>
+<img src="grid1.png" width=300/><br><br></li>
+<li><b>[5 pts extra credit]</b> In the original paper, there is one more subdivision into sixteen regions as shown below, and computation of one histogram for each cell in the grid. This is the level-2 representation of the image.<br><br>
+<img src="grid2.png" width=300/><br><br>
+</li>
+<li>[1 pt] Finally, concatenate the level-0, level-1, and level-2 representations computed in the above steps. This will give you the final image representation, and should be saved in the <font face="courier new">pyramid</font> variable.</li>
+</ol>
+<br>
+
+<u>Part II: Training and obtaining labels from two classifiers</u> (15 pts)
+<br><br>
+In this part, you will write functions to obtain labels on the <i>test</i> data from two classifiers, support vector machines (SVM) and K nearest neighbors (KNN). Note that the value of <i>k</i> in KNN is distinct from the value <i>K</i> in K-means; we'll use <i>k</i> to denote the former and <i>K</i> to denote the latter. 
+<br><br>
+Write the following functions:
+<ol type="1">
+<li>[10 pts] <font face="courier new">function [predicted_labels_test] =
+findLabelsKNN(pyramids_train, labels_train, pyramids_test, k);</font> which predicts the labels of
+the test images using the KNN classifier. For each test image, compute the Euclidean distance between its descriptor and each training image's descriptor (the descriptors are now the Spatial Pyramids). Then find its <i>k</i> closest neighbors among only training images; you can use the provided <font face="courier new">dist2</font> code. Find the mode (most common value; see Matlab's function <font face="courier new">mode</font>) among the labels, and assign the test image to this label. In other words, the neighbors are "voting" on the label of the test image.  <b>You have to write your own code, and you are NOT allowed to use the built-in Matlab function for KNN!</b> 
+<br>
+Inputs:
+<ul>
+<li><font face="courier
+new">pyramids_train, pyramids_test</font> should be an <i>M</i>x1 cell
+array and an <i>N</i>x1 cell array, respectively, where <i>M</i> is
+the size of the training image set and <i>N</i> is the size of your
+test image set, and each <font face="courier new">pyramids{i}</font>
+is the 1x<i>d</i> Spatial Pyramid Match representation of the
+corresponding training or test image. </li>
+<li><font face="courier new">labels_train</font> should be an <i>M</i>x1 vector of
+training labels.</li>
+</ul>
+Outputs:
+<ul>
+<li><font face="courier new">predicted_labels_test</font> should be a <i>N</i>x1 vector of <i>predicted</i> labels for the test images. </li>
+</ul>
+</li>
+<br>
+<li>[5 pts] <font face="courier new">function [predicted_labels_test] =
+findLabelsSVM(pyramids_train, labels_train, pyramids_test);</font> which predicts the labels of the test images using an SVM. This function should include training the SVM. The inputs and outputs are defined as above but now we will use an SVM to determine the outputs. Use the Matlab built-in SVM functions for training and test/prediction. To train a model, use <font face="courier new">model = fitcecoc(X, Y);</font> where <font face="courier new">X</font> (of size <i>m</i>x<i>d</i>) are your features, and <font face="courier new">Y</font> (of size <i>m</i>x1) are the labels you want to predict. To use the <font face="courier new">model</font> you just learned, call <font face="courier new">label = predict(model, X_test);</font> where <font face="courier new">X_test</font> of size <i>n</i>x<i>d</i> are the descriptors for the scenes whose labels you want to predict.</li>
+</ol>
+<br>
+
+<u>Part III: Comparing approaches</u> (25 pts)
+<br><br>
+In this part, you will compare the KNN and SVM classifiers using the SPM representation. You will also compare how the same classifier performs when it uses different levels of the SPM pyramid. Your classifiers will predict to which scene category each test image belongs. 
+<!--We are using scripts for this part so that all variables live in the same space, and you can reuse the computations performed by different scripts while you're debugging. However, for your final submission, make sure each part can run independently, e.g. if the script in part 3 relies on computations in part 1, make sure part 3 calls part 1.-->
+<ol type="1">
+<!-- 
+Create variables <font face="courier new">labels_train, labels_test</font> with dimensionality as defined in Part II above. Each folder in the scene category dataset is a different category. All images from the same scene category will have the same label. Also load the SIFT features for each file and save them in a cell array for later use. Finally, use the provided script <font face="courier new">get_means.m</font> to run K-means on the full set of SIFT features obtained for <i>training</i> images. Save the resulting cluster centers into the <font face="courier new">means</font> variable. Use K=50.<br><br>
+Tips:
+<ul>
+<li>When parsing the contents of the directory, some useful functions are: <font face="courier new">dir, isdir, randperm</font>; as well as the <font face="courier new">.name</font> and other properties on each entry listed using <font face="courier new">dir</font>. </li>
+<li>Use the <font face="courier new">.name</font> property, and index into its last 4 characters, to distinguish between .jpg and .mat files.</li>
+<li>Access the i-th entry of a <font face="courier new">dir</font> listing with <font face="courier new">(i)</font>, and the i-th entry of a cell array with <font face="courier new">{i}</font>.</li>
+</ul>  
+-->
+<br>
+<li>[10 pts] In a script <font face="courier new">compare_representations.m</font>:
+<ol type="a">
+<li>[5 pts] Call your <font face="courier new">computeSPMRepr</font> to compute the spatial pyramid match representation on top of the extracted features, for all train/test images, and store the resulting representations in appropriate variables.</li>
+<li>[5 pts] Use an SVM classifier. Compare the quality of three representations, <font face="courier new">pyramid</font>, <font face="courier new">level_0</font> and <font face="courier new">level_1</font>. In other words, compare the full SPM representation to its constituent parts, which are the level-0 histogram and the concatenations of four histograms in level-1. Compute the accuracy at each level, by measuring what fraction of the images was assigned the correct label. In a file <font face="courier new">results1.txt</font>, describe your findings, and give your explanation of the performance of the different representations.</li>
+</ol>
+<br>
+<li>[15 pts] In a script <font face="courier new">compare_classifiers.m</font>, do the following steps (you can interleave them as you wish, order does not have to be as shown). You can assume the previous script has been run first, so you don't have to recompute the SPM representations.
+<ol type="a">
+<li>[5 pts] Apply the SVM and KNN classifiers (i.e. call <font face="courier new">findLabelsSVM, findLabelsKNN</font>) to predict labels on the test set, using the <font face="courier new">pyramid</font> variable as the representation for each image. For KNN, use the following values of <font face="courier new">k=1:2:15</font>. Each value of <i>k</i> gives a different KNN classifier.</li> 
+<li>[2 pts] Compute the accuracy of each classifier on (1) the training set, and (2) the test set, by comparing its predictions with the "ground truth" labels. </li>
+<li>[5 pts] Plot the training and test accuracy of both types of classifiers, using the values of <i>k</i> on the x-axis, and accuracy on the y-axis. Since SVM does not depend on the value of <i>k</i>, plots its performance as a straight line. Save the result as <font face="courier new">results.png</font> and submit it. For reference, my plot is as follows, but I have omitted some values of <i>k</i> intentionally. Label your axes and show a legend. Useful functions: <font face="courier new">plot, xlabel, ylabel, legend</font>.</li>
+<li>[3 pts] Finally, in a text file <font face="courier new">results2.txt</font>, explain what you see in your plot (using the full range of <i>k</i> values), and explain the trends on the training and test sets you see as <i>k</i> increases. </li>
+<br>
+<img src="results_example.png" width="500"/>
+<br>
+</ol>
+<br>
+<li><b>[2 pts extra credit]</b> Include level-2 in your comparison above, and give possible reasons for its performance relative to the other representations.</li>
+</ol>
+<br><br>
+
+
+<b>Submission:</b>
+<ul>
+<li><font face="courier new">computeSPMRepr.m</font></li>
+<li><font face="courier new">findLabelsKNN.m</font></li>
+<li><font face="courier new">findLabelsSVM.m</font></li>
+<li><font face="courier new">compare_classifiers.m</font></li>
+<li><font face="courier new">compare_representations.m</font></li>
+<li><font face="courier new">results.png</font>, <font face="courier new">results1.txt</font>, <font face="courier new">results2.txt</font></li>
+</ul>
+
+<b>Provided for you on CourseWeb:</b>
+<ul>
+<li><font face="courier new">scenes_lazebnik.zip</font></li>
+<li><font face="courier new">load_split_dataset.m</font> &nbsp; (calls <font face="courier new">kmeansML.m</font>, which calls <font face="courier new">distSqr.m</font>, both provided)</li>
+<li><font face="courier new">computeBOWRepr.m</font> &nbsp; (calls <font face="courier new">dist2.m</font>, also provided)</li>
+
+</ul>
+
+</body>
+</html>

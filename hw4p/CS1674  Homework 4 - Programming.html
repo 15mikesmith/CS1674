@@ -1,0 +1,94 @@
+<html>
+<head>
+<title>CS1674: Homework 4 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 4 - Programming</h2>
+<b>Due:</b> 2/<font color="red">23</font>/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 50 points. 
+<br><br>
+
+<u>Part I: Feature Description</u> (25 points) 
+<br><br>
+In this problem, you will implement a feature description pipeline, as discussed in class. While you will not exactly implement that, <a href="http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf">the SIFT paper</a> by David Lowe is a useful resource, in addition to Section 4.1 of the Szeliski textbook. 
+<br><br>
+Use the following signature: <font face="courier new">function [features, x, y, scores] = compute_features(x, y, scores, Ix, Iy)</font>. The intputs/outputs <font face="courier new">x, y, scores, Ix, Iy </font> are defined in HW3P. The output <font face="courier new">features</font> is an <i>N</i>x<i>d</i> matrix, each row of which contains the <i>d</i>-dimensional descriptor for the <i>n</i>-th keypoint. 
+We'll simplify the histogram creation procedure a bit, compared to the original implementation presented in class. In particular, we'll compute a descriptor with dimensionality <i>d</i>=8 (rather than 4x4x8), which contains an 8-dimensional histogram of gradients computed from a 11x11 grid centered around each detected keypoint (i.e. -5:+5 neighborhood horizontally and vertically).
+<ol>
+<li>[5 pts] If any of your detected keypoints are less than 5 pixels from the top/left or 5 pixels from the bottom/right of the image, i.e. pixels lacking 5+5 neighbors in either the horizontal or vertical direction, erase this keypoint from the <font face="courier new">x, y, scores</font> vectors <i>at the start of your code</i> and do not compute a descriptor for it.</li>
+<li>[5 pts] To compute the gradient magnitude <i>m(x, y)</i> and gradient angle <i>&theta;(x, y)</i> at point (x, y), take <i>L</i> to be the image and use the formula below shown in class and Matlab's <font face="courier new">atand</font>, which returns values in the range [-90, 90]. If the gradient magnitude is 0, then both the <i>x</i> and <i>y</i> gradients are 0, and you should ignore the orientation for that pixel (since it won't contribute to the histogram). 
+<br>
+<img src="gradients.png">
+<br><br>
+<li>[5 pts] Quantize the gradient orientations in 8 bins (so put values between -90 and -67.5 degrees in one bin, the -67.5 to -45 degree angles in another bin, etc.). For example, you can have a variable with the same size as the image, that says to which bin (1 through 8) the gradient at that pixel belongs.</li>
+<li>[5 pts] To populate the SIFT histogram, consider each of the 8 bins. To populate the first bin, sum the gradient magnitudes that are between -90 and -67.5 degrees. Repeat analogously for all bins. </li>
+<li>[5 pts] Finally, you should clip all values to 0.2 as discussed in class, and normalize each descriptor to be of unit length, e.g. using <font face="courier new">hist_final = hist_final / sum(hist_final);</font> Normalize both before and after the clipping. You do not have to implement any more sophisticated detail from the Lowe paper. </li>
+
+
+
+</li>
+</ol>
+
+
+<u>Part II: Image Description with SIFT Bag-of-Words</u> (8 points) 
+<br><br>
+
+In this part, you will compute a bag-of-words histogram representation of an image. The histogram for image
+<i>I<sub>j</sub></i> is a <i>k</i>-dimensional vector: <i>F(I<sub>j</sub>) = [&nbsp;freq<sub>1, j</sub> &nbsp;&nbsp; freq<sub>2, j</sub> &nbsp;&nbsp; ... &nbsp;&nbsp; freq<sub>k, j</sub>&nbsp;]</i>, where each entry
+<i>freq<sub>i, j</sub></i> counts the number of occurrences of the <i>i</i>-th visual word in image <i>j</i>, and <i>k</i> is
+the number of total words in the vocabulary.
+
+<br><br>
+Use the following function signature: <font face="courier new">function [bow_repr] = computeBOWRepr(features, means)</font> where <font face="courier new">bow_repr</font> is a normalized bag-of-words histogram, <font face="courier new">features</font> is the <i>M</i>x8 set of descriptors computed for the image (output by the function you implemented in Part I above), and <font face="courier new">means</font> is the <i>k</i>x8 set of cluster means, which is provided for you. 
+
+<ol>
+<li>[1 pt] A bag-of-words histogram has as many dimensions as the number of clusters <i>k</i>, so initialize the <font face="courier new">bow</font> variable accordingly.</li>
+<li>[3 pts] Next, for each feature (i.e. each row in <font face="courier new">features</font>), compute its distance to each of the cluster means, and find the closest mean. A feature is thus conceptually "mapped" to the closest cluster. You can do this efficiently using the provided <font face="courier new">dist2</font> function, whose use is described at the top of the function.</li>
+<li>[3 pts] To compute the bag-of-words histogram, count how many features are mapped to each cluster.</li>
+<li>[1 pts] Finally, normalize the histogram by dividing each entry by the sum of the entries.</li>
+</ol>
+
+
+
+<u>Part III: Image Description with Texture</u> (5 points) 
+<br><br>
+
+In this problem, you will use texture to represent images. You will use the responses of images to filters that you computed in HW2P. You will then compute two image representations based on the filter responses. The first will simply be a concatenation of the filter responses for all pixels and all filters. The second will contain the mean of filter reponses (averaged across all pixels) for each image. 
+
+<br><br>
+Write a  <font face="courier new">function [texture_repr_concat, texture_repr_mean] = computeTextureReprs(image, F)</font> where <font <font face="courier new">image</font> is the output of an <font face="courier new">imread</font>, and <font face="courier new">F</font> is the 49x49x<i>num_filters</i> matrix of filters you used in HW2P. 
+
+<ol>
+<li>[3 pts] First, create a new variable <font face="courier new">responses</font> of size <i>num_filters</i>x<i>num_rows</i>x<i>num_cols</i>, where <i>num_rows</i>x<i>num_cols</i> is the size of the image. Convert the input image to grayscale, and convert it to size 100x100. Compute the responses of the image to each of the filters, and store the results in <font face="courier new">responses</font>.</li>
+<li>[1 pts] Create the first image representation <font face="courier new">texture_repr_concat</font> by simply converting <font face="courier new">responses</font> to a vector, i.e. concatenating all pixels in the response images for all filters. </li> 
+<li>[1 pts] Now let's compute the image represenation in a different way. This time, the representation <font face="courier new">texture_repr_mean</font> will be of size <i>num_filters</i>x1. Compute each entry in <font face="courier new">texture_repr_mean</font> as the mean response across all pixels to the corresponding filter. In other words, rather than keeping information about how each pixel responded to the filter, we are collapsing that information to a single value: the mean across all pixels. </li>
+</ol>
+
+<u>Part IV: Comparison of Image Descriptions</u> (12 points) 
+<br><br>
+
+In this part, we will test the quality of the different representations. A good representation is one that retains some of the semantics of the image; oftentimes by "semantics" we mean object class label. In other words, a good representation should be one such that two images of the same object have similar representations, and images of different objects have different representations. We will test to what extent this is true, using our images of three object classes from HW2P: two cardinals, two leopards, and two pandas. 
+<br><br>
+To test the quality of the representations, we will compare two averages: the average <i>within-class distance</i> and the average <i>between-class distance</i>. A representation is a vector, and "distance" is the Euclidean distance between two vectors (i.e. the representations of two images). Use the provided <font face="courier new">eucl.m</font>. "Within-class distances" are distances computed between the vectors for images of the same class (i.e. cardinal-cardinal, panda-panda). "Between-class distances" are those computed between images of different classes, i.e. cardinal-panda, panda-leopard, etc. If you have a good image representation, should the average within-class or the average between-class distance be smaller? 
+<br><br>
+In a script <font face="courier new">compare_representations.m</font>:
+<ol>
+<li>[1 pts] Read in the cardinal, leopard, and panda images from HW2P, and resize them to 100x100.</li>
+<li>[2 pts] Use the code you wrote above to compute three image representations (<font face="courier new">bow_repr</font>, <font face="courier new">texture_repr_concat</font>, and <font face="courier new">texture_repr_mean</font>) for each image.</li>
+<li>[6 pts] Compute and print the ratio <i>average_within_class_distance / average_between_class_distance</i> for each representation. To do so, use one vector to store within-category distances (distances between images that are of the same animal category), and another to store between-category distances (distance between images showing different animal categories). Compute the <font face="courier new">mean</font> of each of the two vectors, then compute the ratio of the means. 
+</li>
+<li>[3 pts] In addition to your code, answer the following questions in a file <font face="courier new">answers.txt</font>. For which of the three representations is the within-between ratio smallest? Is this what you expected? Why or why not? Which of the three types of descriptors that you used is the best one? How can you tell? </li>
+</ol>
+
+<b>Submission:</b>
+<ul>
+<li><font face="courier new">compute_features.m</font> (from Part I)</li>
+<li><font face="courier new">computeBOWRepr.m</font> (from Part II)</li>
+<li><font face="courier new">computeTextureReprs.m</font> (from Part III)</li>
+<li><font face="courier new">compare_representations.m</font> and <font face="courier new">answers.txt</font> (from Part IV)</li>
+</ul>
+
+</body>
+</html>
