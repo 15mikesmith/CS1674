@@ -1,0 +1,189 @@
+<html>
+<head>
+<title>CS1674: Homework 2 - Programming</title>
+</head>
+<body>
+<h2>CS1674: Homework 2 - Programming</h2>
+<b>Due:</b> 2/1/2018, 11:59pm</b> 
+<br><br>
+
+This assignment is worth 60 points. The provided files can be found on CourseWeb.
+<br><br>
+
+<u>Part I: Content-Aware Image Resizing</u> (35 points) 
+<br><br>
+
+You will implement one part of the content-aware image resizing technique
+described in Shai Avidan and Ariel Shamir's SIGGRAPH 2007 paper, "Seam Carving for Content-Aware Image Resizing", available <a href="seamcarving.pdf">here</a>. First read through the paper, with emphasis on Section 3. Most functions will be provided for you, and some you will have to write. <i>The goal is to get more practice with Matlab, examine the performance of the method on different kinds of input images, and produce visually interesting results.</i> 
+<br><br>
+<a href="hw2p_examples.pdf">Here</a> are some example results.
+<br><br>
+Put each function you write in a separate file called [function-name].m and submit all of them, excluding ones that were provided with the assignment. All the <i>functions</i> you are asked to write are brief, but some require more thought than others.
+<br><br>
+Here is the code you need to develop:
+<ol>
+<li>[5 points] Function <font face="courier new">[energyImage, Ix, Iy] = energy_image(im)</font>
+ - to compute the energy at each pixel using the magnitude of the
+<i>x</i> and <i>y</i> gradients. 
+<br><br>
+Inputs:
+<ul>
+<li><font face="courier new">im</font> should be a nrows-x-ncols-x-3 matrix of <font face="courier new">class</font> (datatype) <font face="courier new">uint8</font>, e.g. the output of <font face="courier new">imread</font> on a color image. However, you need to convert it to grayscale before computing the gradients, using <font face="courier new">rgb2gray</font>.
+</li>
+</ul>
+Outputs:
+<ul>
+<li>Each of the outputs <font face="courier new">energyImage, Ix, Iy</font> should be 2D matrices of class <font face="courier new">double</font>. </li>
+<li><font face="courier new">Ix, Iy</font> are the gradients in the x and y directions, i.e. the dI/dx and dI/dy; use two of the filters we discussed in class to compute them. Don't use Matlab's <font face="courier new">imgradient</font> function. </li>
+<li><font face="courier new">energyImage</font> is computed similar to equation 1 in the paper, but using L2 norm: sqrt((dI/dx)^2+(dI/dy)^2). </li>
+</ul>
+<br>
+</li>
+<li>[10 points] Function <font face="courier new">displaySeam(im, seam, seamDirection)</font> - to display the selected type of seam on top of the input image. 
+<br><br>
+Inputs:
+<ul>
+<li>The input
+<font face="courier new">im</font> should be the result of an <font face="courier new">imread</font>.</li>
+<li><font face="courier new">seamDirection</font> should be the string 'HORIZONTAL' or 'VERTICAL'. </li>
+<li><font face="courier new">seam</font> should be
+the output of <font face="courier new">find_optimal_vertical_seam</font> or <font face="courier new">find_optimal_horizontal_seam</font> (which are provided for you).</li>
+</ul>
+
+<br><b>Tips:</b> 
+<ul>
+<li>To plot points on top of a displayed image in an existing figure, first use <font face="courier new">hold on;</font>
+followed by <font face="courier new">plot(...)</font>.</li>
+<li>The key challenge here will be figuring out in what order to give the arguments to the <font face="courier new">plot</font> function calls. The first argument corresponds to the <i>x</i> axis, and the second to the <i>y</i> axis. A seam is a collection of points, and each point should be plotted at a particular point on the <i>x</i> axis and on the <i>y</i> axis. You will need to understand what the pixel stored at a particular index in a seam represents (i.e. where it came from), and it is helpful to think about what the lengths of the seams equal. Also note that when you plot things over an image, rows of the image correspond to the <i>y</i> axis, and columns to the <i>x</i> axis.</li>
+</ul>
+<br>
+</li>
+<li>[5 pts] Function <font face="courier new">[reducedColorImage] = reduceWidth(im, display_flag)</font> - to reduce the width of your image in a content-aware away. The function should call the <font face="courier new">energy_image</font>, <font face="courier new">cumulative_minimum_energy_map</font>, and <font face="courier new">find_optimal_vertical_seam</font> functions. 
+<br><br>
+Inputs:
+<ul>
+<li>The function should take in a nrows-x-ncols-x-3
+matrix <font face="courier new">im</font> of class <font face="courier new">uint8</font>.</li>
+<li>If the <font face="courier new">display_flag</font> is set to <font face="courier new">true</font>, the function should display, in a 1x3 <font face="courier new">subplot</font>, the following: (a) the energy image, (b) the cumulative energy image, (c) the optimal seam (using <font face="courier new">displaySeam</font>). </li>
+</ul>
+Outputs:
+<ul>
+<li>The output must be a 3D matrix <font face="courier new">reducedColorImage</font>, of class <font face="courier new">uint8</font>, which is the same as the input image but with its width reduced by one pixel. </li>
+</ul>
+
+<br><b>Tips:</b>
+<ul>
+<li>The corresponding function <font face="courier new">[reducedColorImage] = reduceHeight(im)</font> is provided for you; use it to see one possible way to implement the reduction in width. </li>
+</ul>
+<br>
+
+<li>[5 points] Function <font face="courier new">[] = generate_results(filename, reduceAmt, reduceWhat)</font> - to run the functions you wrote, and the provided functions, on an image, and show the results. In your function, after reading in the image, you should call <font face="courier new">reduceWidth</font> or <font face="courier new">reduceHeight</font> as many times as needed to reduce the width/height by the requested amount, but should only set the display flag to true in the first iteration. You should also display, in a 1x3 <font face="courier new">subplot</font>: (a) the original image, (b) the final content-aware-reduced image, and (c) the content-agnostic reduction using a simple <font face="courier new">imresize</font>. Label the figure with a <font color="red">title</font> indicating what was reduced, and by how many pixels. Label the subfigures with titles "original", "content-aware", and "standard" <font color="red">(put one <font face="courier new">title</font> after each subplot).</font>
+<br><br>
+Inputs:
+<ul>
+<li><font face="courier new">filename</font> is a character array (e.g. <font face="courier new">'pittsburgh.png'</font>),</li>
+<li><font face="courier new">reduceAmt</font> is an integer which says by how many pixels to reduce the width/height, and</li>
+<li><font face="courier new">reduceWhat</font> is <font face="courier new">'WIDTH'</font> or <font face="courier new">'HEIGHT'</font>.</li>
+</ul>
+</li>
+</ol>
+
+Required visual results:
+<ol start="5">
+<li>[5 pts] Include the visual results of running <font face="courier new">generate_results</font> on the provided <font face="courier new"><a href="prague.jpg">prague.jpg</a></font> and shrinking its height by 100 pixels. Also include the results of shrinking the width of the provided <font face="courier new"><a href="mall.jpg">mall.jpg</a></font> by 100 pixels. For both images, include:
+<ul>
+<li>the original image and the results of standard and content-aware reduction (saved as files <font face="courier new">prague_height_reduced.png</font> and <font face="courier new">mall_width_reduced.png</font>),</li>
+<li>the energy and cumulative energy maps for the original image, and the first optimal seam (saved as files <font face="courier new">prague_energy.png</font> and <font face="courier new">mall_energy.png</font>).</li>
+</ul>
+</li>
+<br>
+
+<li>[5 pts] Provide one interesting result on a different image of your choice. The goal is
+to form some perceptually pleasing outputs where the resizing better preserves content
+than a blind resizing would, or an example where the output looks unrealistic
+or has artifacts ("failure cases"). Be creative in the images you
+choose, and in the amount of combined vertical and horizontal carvings you apply. If you have a large image, try applying <font face="courier new">imresize</font> first to resize the image to a small size, in order to make the computations faster and allow you to try more ways of transforming the image.
+Create a 1x3 <font face="courier new">subplot</font> and display the following three: (a) the original image, (b) resizing using <font face="courier new">imresize</font>, and (c) content-aware resizing in your submission. Use a title in your figure to say by how much you reduced the size, and in which direction. Name the file <font face="courier new">interesting.png</font> and include it in your submission.
+</li>
+</ol>
+
+Provided functions:
+<ul>
+<li><font face="courier new">M = cumulative_minimum_energy_map(energyImage,seamDirection)</font> - computes minimum cumulative energy. The input <font face="courier new">energyImage</font> is a 2D matrix output by the <font face="courier new">energy_image</font> function above, and the input <font face="courier new">seamDirection</font> is 'HORIZONTAL' or 'VERTICAL'. The output is a 2D matrix of class <font face="courier new">double</font>.</li>
+<li><font face="courier new">verticalSeam = find_optimal_vertical_seam(M)</font> and <font face="courier new">horizontalSeam = find_optimal_horizontal_seam(M)</font> - compute the optimal
+vertical and horizontal seams. The input is the 2D matrix output by the function above, and the output is a
+vector containing the row indices (or column indices, respectively) of the 
+pixels belonging to a horizontal (or vertical, respectively) seam. For a horizontal seam, you have as many seam points as you have image columns, i.e. one row index for each image column.</li>
+<li><font face="courier new">[reducedColorImage] = reduceHeight(im, display_flag)</font> - reduces the height of your image in a content-aware away (see description of <font face="courier new">reduceWidth</font> above)</li>
+ </ul>
+
+
+
+<u>Part II: Image Responses with Filters</u> (15 points) 
+<br><br>
+In this problem, you will measure the responses of images to different filters. For each image, you will compute the response of each image pixel to the filters from a "filter bank" as discussed in class. In a later assignment, you will use these responses to filters to compute image representations. 
+<ol>
+<li>Download these images:
+<a href="cardinal1.jpg">cardinal1</a>, 
+<a href="cardinal2.jpg">cardinal2</a>, 
+<a href="leopard1.jpg">leopard1</a>, 
+<a href="leopard2.jpg">leopard2</a>, 
+<a href="panda1.jpg">panda1</a>, 
+<a href="panda2.jpg">panda2</a>. </li>
+<li>Download the script <font face="courier new">makeLMfilters</font> from the <a href="http://www.robots.ox.ac.uk/~vgg/research/texclass/filters.html">Leung-Malik filter bank</a> (also provided on CourseWeb), and run it (<font face="courier new">F = makeLMfilters;</font>) to get a set of filters. Each filter <font face="courier new">F(:, :, k)</font> is of size 49x49, and there are 48 filters.</li>
+<li>[5 pts] In a script <font face="courier new">filter_responses.m</font>, use a cell array to store the list of filenames so you can loop over them (e.g. <font face="courier new">filenames{i}</font>). Read in all images, convert them to grayscale, and resize them to the same square size (e.g. 100x100), so that the visual map of responses (filtering outputs) can be more comparable across images. Compute the cross-correlation of each image with each of the 48 filters using <font face="courier new"><a href="https://www.mathworks.com/help/images/ref/imfilter.html">imfilter</a></font>.</li>
+<li>[5 pts] For each filter, generate a 2x4 subplot showing the following subplot rows: (1) the filter and a blank subplot, (2) the responses to the cardinal images, (3) the responses to the leopard images, and (4) the responses to the panda images. </li>
+<li>[5 pts] Choose and include in your submission (1) one filter where the responses for the same animal category are similar, while the responses for different animal categories are quite distinct; and (2) one filter where responses of different animals look fairly similar. Name the files <font face="courier new">same_animal_similar.png</font> and <font face="courier new">different_animals_similar.png</font>. Explain what you see in each case. See an example for one filter below.
+
+<br><br><b>Tips:</b>
+<ul>
+<li>You can use <font face="courier new">saveas(gcf, strcat('responses_to_filter_', num2str(i), '.png'));</font> to save your subplots, so you can later browse through them and pick interesting examples.</li>
+<li>You can also save images directly without displaying them, by turning the visibility off using <font face="courier new">set(0, 'DefaultFigureVisible', 'off');</font> near the beginning of your script. Make sure to turn it back on after this assignment!</li>
+</ul>
+</li>
+</ol>
+
+<img src="responses_to_filter_1.png" width="500"/>
+
+<br><br>
+
+<u>Part III: Hybrid Images</u> (10 points) 
+<br><br>
+In this problem, you will create a hybrid image (which looks like one thing zoomed in and another zoomed out) like the one shown in class. 
+<ol>
+<li>Download one pair of images: 
+<ul>
+<li><a href="woman_happy.png">woman_happy</a> and <a href="woman_neutral.png">woman_neutral</a>, or </li>
+<li><a href="baby_happy.jpg">baby_happy</a> and <a href="baby_weird.jpg">baby_weird</a>.</li>
+</ul>
+</li>
+<li>[3 pts] In a script <font face="courier new">hybrid_image.m</font>, read in the first image in the pair as <font face="courier new">im1</font> and the second as <font face="courier new">im2</font>. Convert both images to grayscale, and resize them to the same square size (e.g. 512x512). </li>
+<li>[2 pts] Apply a Gaussian filter to both, using e.g.
+<font face="courier new">imgaussfilt(im1, 10, 'FilterSize', 31)</font>. Save the results as <font face="courier new">im1_blur, im2_blur</font>.</li>
+<li>[2 pts] Obtain the detail image, by subtracting <font face="courier new">im2_blur</font> from <font face="courier new">im2</font>, and save the result as <font face="courier new">im2_detail</font>.</li>
+<li>[3 pts] Now add <font face="courier new">im1_blur</font> and <font face="courier new">im2_detail</font>, show the image, save it as <font face="courier new">'hybrid.png'</font>, and include it with your submission. Play with scaling it up and down (by dragging the corner of the Matlab figure) to see the "hybrid" effect.</li>
+</li>
+</ol>
+<br>
+
+<b>Submission:</b> Please submit the following files:
+<ul>
+<li><font face="courier new">energy_image.m</font></li>
+<li><font face="courier new">displaySeam.m</font></li>
+<li><font face="courier new">reduceWidth.m</font></li>
+<li><font face="courier new">generate_results.m</font></li>
+<li><font face="courier new">filter_responses.m</font></li>
+<li><font face="courier new">hybrid_image.m</font></li>
+<li><font face="courier new">prague_height_reduced.png</font>, <font face="courier new">mall_width_reduced.png</font>, <font face="courier new">prague_energy.png</font>, and <font face="courier new">mall_energy.png</font></li>
+<li><font face="courier new">interesting.png</font></li>
+<li><font face="courier new">same_animal_similar.png</font> and <font face="courier new">different_animals_similar.png</font> </li>
+<li><font face="courier new">hybrid.png</font> </li>
+</ul>
+<br>
+
+<b>Acknowledgement:</b> Part I is partially based on an exercise by Kristen Grauman. 
+
+<br><br>
+
+</body>
+</html>
